@@ -83,7 +83,7 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h2 className="text-xl font-semibold">Preview</h2>
 
       {url ? (
@@ -99,56 +99,65 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
           </AspectRatio>
 
           {metadata && (
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <Card>
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="bg-card/50 backdrop-blur">
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Original Size</div>
-                  <div className="text-2xl font-bold">
-                    {(file!.size / (1024 * 1024)).toFixed(1)} MB
+                  <div className="text-sm font-medium text-muted-foreground">Size</div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <div className="text-2xl font-bold">
+                      {(file!.size / (1024 * 1024)).toFixed(1)}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">MB</div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/50 backdrop-blur">
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Estimated Output</div>
-                  <div className="text-2xl font-bold">
-                    {getEstimatedSize().toFixed(1)} MB
+                  <div className="text-sm font-medium text-muted-foreground">Output</div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <div className="text-2xl font-bold">
+                      {getEstimatedSize().toFixed(1)}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">MB</div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/50 backdrop-blur">
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Resolution</div>
-                  <div className="text-2xl font-bold">
-                    {metadata.width}x{metadata.height}
+                  <div className="text-sm font-medium text-muted-foreground">Resolution</div>
+                  <div className="mt-1 text-2xl font-bold">
+                    {metadata.width}×{metadata.height}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/50 backdrop-blur">
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Duration</div>
-                  <div className="text-2xl font-bold">
-                    {metadata.duration.toFixed(1)}s
+                  <div className="text-sm font-medium text-muted-foreground">Duration</div>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <div className="text-2xl font-bold">
+                      {metadata.duration.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-muted-foreground font-medium">sec</div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/50 backdrop-blur">
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Original FPS</div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-sm font-medium text-muted-foreground">Original FPS</div>
+                  <div className="mt-1 text-2xl font-bold">
                     {metadata.fps}
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-card/50 backdrop-blur">
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Final FPS</div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-sm font-medium text-muted-foreground">Final FPS</div>
+                  <div className="mt-1 text-2xl font-bold">
                     {getFinalFps()}
                   </div>
                 </CardContent>
