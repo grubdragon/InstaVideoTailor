@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import AspectRatioIndicator from "./aspect-ratio-indicator";
 
 interface FormatSelectorProps {
   selectedFormat: VideoFormat;
@@ -62,9 +63,12 @@ export default function FormatSelector({
           className="grid grid-cols-3 gap-4"
         >
           {aspectRatios[selectedFormat].map((ratio) => (
-            <div key={ratio} className="flex items-center space-x-2">
-              <RadioGroupItem value={ratio} id={ratio} />
-              <Label htmlFor={ratio}>{ratio}</Label>
+            <div key={ratio} className="flex flex-col items-center space-y-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <AspectRatioIndicator ratio={ratio} />
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value={ratio} id={ratio} />
+                <Label htmlFor={ratio}>{ratio}</Label>
+              </div>
             </div>
           ))}
         </RadioGroup>
