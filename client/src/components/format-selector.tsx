@@ -63,7 +63,7 @@ export default function FormatSelector({
         <RadioGroup
           value={selectedAspectRatio}
           onValueChange={onAspectRatioChange}
-          className="grid grid-cols-3 gap-4"
+          className="grid grid-cols-3 gap-4 place-items-center"
         >
           {aspectRatios[selectedFormat].map((ratio) => (
             <div key={ratio} className="flex flex-col items-center space-y-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
