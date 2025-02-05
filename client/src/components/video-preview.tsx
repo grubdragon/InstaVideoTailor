@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import CropControls from "./crop-controls";
+import { useToast } from "@/hooks/use-toast";
 
 interface VideoPreviewProps {
   file: File | null;
@@ -23,7 +24,9 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
   const [url, setUrl] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
   const [crop, setCrop] = useState({ x: 50, y: 50 });
+  const [isExporting, setIsExporting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (file) {
@@ -45,18 +48,53 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
     return metadata.fps > 30 ? 30 : metadata.fps;
   };
 
-  const handleExport = () => {
-    // TODO: Implement actual video processing
-    console.log('Export video with settings:', {
-      format,
-      aspectRatio,
-      crop,
-      finalFps: getFinalFps(),
-    });
-  };
+  const handleExport = async () => {
+    if (!file || !metadata) return;
 
-  const [ratio1, ratio2] = aspectRatio.split(':').map(Number);
-  const ratioValue = ratio1 / ratio2;
+    setIsExporting(true);
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("format", format);
+    formData.append("aspectRatio", aspectRatio);
+    formData.append("cropX", crop.x.toString());
+    formData.append("cropY", crop.y.toString());
+
+    try {
+      const response = await fetch("/api/process-video", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process video");
+      }
+
+      // Create a download link for the processed video
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `processed_${file.name}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+
+      toast({
+        title: "Video processed successfully",
+        description: "Your video has been optimized and downloaded.",
+      });
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        variant: "destructive",
+        title: "Export failed",
+        description: "There was an error processing your video. Please try again.",
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
@@ -91,6 +129,9 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
     }
   };
 
+  const [ratio1, ratio2] = aspectRatio.split(':').map(Number);
+  const ratioValue = ratio1 / ratio2;
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Preview</h2>
@@ -121,10 +162,10 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
             <Button 
               className="w-full" 
               onClick={handleExport}
-              disabled={!metadata}
+              disabled={!metadata || isExporting}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export Video
+              {isExporting ? "Processing..." : "Export Video"}
             </Button>
           </div>
 
