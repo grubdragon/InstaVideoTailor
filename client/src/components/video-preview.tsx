@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import ReactPlayer from "react-player";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { VideoFormat } from "@shared/schema";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface VideoPreviewProps {
@@ -14,6 +13,7 @@ interface VideoMetadata {
   duration: number;
   width: number;
   height: number;
+  fps: number;
 }
 
 export default function VideoPreview({ file, format, aspectRatio }: VideoPreviewProps) {
@@ -35,15 +35,49 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
     return (metadata.duration * bitrate * 1000) / (8 * 1024 * 1024); // MB
   };
 
+  const getFinalFps = () => {
+    if (!metadata?.fps) return 30; // Default to 30 if we can't detect
+    // Instagram generally optimizes for 30fps
+    return metadata.fps > 30 ? 30 : metadata.fps;
+  };
+
   const [ratio1, ratio2] = aspectRatio.split(':').map(Number);
   const ratioValue = ratio1 / ratio2;
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
+      // Create a temporary canvas to get FPS
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      let fps = 30; // Default FPS if we can't detect
+      if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+        const video = videoRef.current;
+        let lastTime: number | null = null;
+        let frames = 0;
+        const callback = (now: number, metadata: any) => {
+          if (lastTime === null) {
+            lastTime = now;
+          } else {
+            frames++;
+            const delta = now - lastTime;
+            if (delta >= 1000) { // After 1 second
+              fps = Math.round((frames * 1000) / delta);
+              lastTime = null;
+              frames = 0;
+            }
+          }
+          video.requestVideoFrameCallback(callback);
+        };
+        video.requestVideoFrameCallback(callback);
+      }
+
       setMetadata({
         duration: videoRef.current.duration,
         width: videoRef.current.videoWidth,
-        height: videoRef.current.videoHeight
+        height: videoRef.current.videoHeight,
+        fps
       });
     }
   };
@@ -51,7 +85,7 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold">Preview</h2>
-      
+
       {url ? (
         <>
           <AspectRatio ratio={ratioValue}>
@@ -63,7 +97,7 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
               controls
             />
           </AspectRatio>
-          
+
           {metadata && (
             <div className="grid grid-cols-2 gap-4 mt-4">
               <Card>
@@ -74,7 +108,7 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardContent className="p-4">
                   <div className="text-sm font-medium">Estimated Output</div>
@@ -86,7 +120,7 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
 
               <Card>
                 <CardContent className="p-4">
-                  <div className="text-sm font-medium">Original Resolution</div>
+                  <div className="text-sm font-medium">Resolution</div>
                   <div className="text-2xl font-bold">
                     {metadata.width}x{metadata.height}
                   </div>
@@ -98,6 +132,24 @@ export default function VideoPreview({ file, format, aspectRatio }: VideoPreview
                   <div className="text-sm font-medium">Duration</div>
                   <div className="text-2xl font-bold">
                     {metadata.duration.toFixed(1)}s
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm font-medium">Original FPS</div>
+                  <div className="text-2xl font-bold">
+                    {metadata.fps}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-sm font-medium">Final FPS</div>
+                  <div className="text-2xl font-bold">
+                    {getFinalFps()}
                   </div>
                 </CardContent>
               </Card>

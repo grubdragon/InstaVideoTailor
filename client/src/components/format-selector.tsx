@@ -13,15 +13,15 @@ interface FormatSelectorProps {
 }
 
 const formatLabels = {
-  feed: "Feed Post",
-  reelsStories: "Reels & Stories",
+  feed: "Feed",
+  reelsStories: "Reels",
   igtv: "IGTV"
 };
 
 const formatSpecs = {
-  feed: "60 seconds, up to 250MB",
-  reelsStories: "90 seconds, up to 4GB",
-  igtv: "60 minutes, up to 3.6GB"
+  feed: "60s, 250MB",
+  reelsStories: "90s, 4GB",
+  igtv: "60min, 3.6GB"
 };
 
 export default function FormatSelector({
@@ -33,7 +33,6 @@ export default function FormatSelector({
   const handleFormatChange = (value: string) => {
     const format = value as VideoFormat;
     onFormatChange(format);
-    // Auto-select first aspect ratio when format changes
     onAspectRatioChange(aspectRatios[format][0]);
   };
 
@@ -42,14 +41,18 @@ export default function FormatSelector({
       <div>
         <h3 className="text-lg font-medium mb-4">1. Select Format</h3>
         <Tabs value={selectedFormat} onValueChange={handleFormatChange}>
-          <TabsList className="grid grid-cols-3 w-full">
+          <TabsList className="grid w-full grid-cols-3 h-9">
             {Object.keys(videoFormats).map((format) => (
-              <TabsTrigger key={format} value={format}>
+              <TabsTrigger 
+                key={format} 
+                value={format}
+                className="text-xs px-2 py-1"
+              >
                 {formatLabels[format as VideoFormat]}
               </TabsTrigger>
             ))}
           </TabsList>
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground mt-2">
             {formatSpecs[selectedFormat]}
           </p>
         </Tabs>
@@ -67,7 +70,7 @@ export default function FormatSelector({
               <AspectRatioIndicator ratio={ratio} />
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value={ratio} id={ratio} />
-                <Label htmlFor={ratio}>{ratio}</Label>
+                <Label htmlFor={ratio} className="text-sm">{ratio}</Label>
               </div>
             </div>
           ))}
